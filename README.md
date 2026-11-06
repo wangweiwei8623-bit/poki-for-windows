@@ -1,11 +1,11 @@
-﻿<p align="center">
+<p align="center">
   <img src="docs/images/poki-icon.png" width="72" height="72" alt="Poki icon">
 </p>
 
 <h1 align="center">Poki for Windows</h1>
 
 <p align="center">
-  English | <a href="README.zh-CN.md">绠€浣撲腑鏂?/a>
+  English | <a href="README.zh-CN.md">简体中文</a>
 </p>
 
 <p align="center">
@@ -13,7 +13,7 @@
   <img src="https://img.shields.io/badge/platform-Windows%20%7C%20iOS-lightgrey" alt="Platform: Windows and iOS">
 </p>
 
-**Control a real iPhone from an MCP agent on a Windows host 鈥?no Mac, no Xcode,
+**Control a real iPhone from an MCP agent on a Windows host - no Mac, no Xcode,
 no jailbreak, no extra hardware.** Poki exposes the iPhone's accessibility tree
 and touch/keyboard input to any MCP client through a local server, so an agent
 operates the phone the way you do.
@@ -31,21 +31,25 @@ operates the phone the way you do.
 ## How it works
 
 ```text
-MCP client (Aidi, Claude Code, Codex, 鈥?
-        鈹? streamable HTTP + bearer token, 127.0.0.1 only
-        鈻?Poki MCP server  (Node.js 24, src/daemon.mjs)
-        鈹? POKI_WDA_URL=http://127.0.0.1:8100
-        鈻?WebDriverAgent (XCUITest runner signed onto the iPhone)
-        鈻?        鈹? XCTest / testmanagerd over the iOS 17+ developer tunnel
+MCP client (Aidi, Claude Code, Codex, ...)
+        |  streamable HTTP + bearer token, 127.0.0.1 only
+        v
+Poki MCP server  (Node.js 24, src/daemon.mjs)
+        |  POKI_WDA_URL=http://127.0.0.1:8100
+        v
+WebDriverAgent (XCUITest runner signed onto the iPhone)
+        ^
+        |  XCTest / testmanagerd over the iOS 17+ developer tunnel
 go-ios  (userspace tunnel on 28100, `ios forward` for 8100)
-        鈹? USB
-        鈻?iPhone
+        |  USB
+        v
+iPhone
 ```
 
 Three pieces replace the Mac:
 
 1. **go-ios** opens the iOS 17+ developer tunnel and starts WebDriverAgent
-   through `testmanagerd` 鈥?the same path Xcode uses, without Xcode.
+   through `testmanagerd` - the same path Xcode uses, without Xcode.
 2. **WebDriverAgent** is signed and installed once with a free Apple ID
    (Sideloadly does the signing on Windows), then driven over plain HTTP.
 3. **Poki** gains a third device backend, [src/backends/wda.mjs](src/backends/wda.mjs),
@@ -96,7 +100,6 @@ bridge: `node src\stdio.mjs`.
 Check it:
 
 ```powershell
-curl.exe -s -H "Authorization: Bearer <token>" http://127.0.0.1:47825/mcp ...
 node bin/call.mjs list_devices
 ```
 
@@ -108,7 +111,7 @@ node bin/call.mjs list_devices
 | Operation | Status |
 | --- | --- |
 | `list_devices`, `get_device_info` | works (one virtual device, `wda`) |
-| `take_screenshot`, screen scale | works 鈥?scale is derived from the WDA screenshot |
+| `take_screenshot`, screen scale | works - scale is derived from the WDA screenshot |
 | `list_elements` (accessibility tree) | works |
 | `tap`, `double_tap`, `long_press`, `swipe`/`drag`, `pinch` | implemented |
 | `type_text`, `press_key` (Return / Backspace) | implemented |
@@ -125,8 +128,8 @@ Device: iPhone 11 Pro, iOS 18.5, WebDriverAgent 16.15.2.
 | Check | Result |
 | --- | --- |
 | Developer tunnel + `ios forward 8100` | works |
-| `list_devices` 鈫?`iPhone (WebDriverAgent)` | works |
-| `take_screenshot` | works (1125脳2436 PNG) |
+| `list_devices` -> `iPhone (WebDriverAgent)` | works |
+| `take_screenshot` | works (1125 x 2436 PNG) |
 | `list_elements` / WDA `source` | works |
 | Launch Safari and navigate to a URL | works |
 | `tap` / `type_text` | implemented, not yet exercised in a recorded run |
@@ -165,5 +168,4 @@ AGPL-3.0-only, inherited from upstream. This is a modified fork; see
 [NOTICE.md](NOTICE.md) for what changed and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)
 for bundled dependencies.
 
-Upstream: <https://github.com/JosssphZhou/poki> 路 <https://poki.bot>
-
+Upstream: <https://github.com/JosssphZhou/poki> / <https://poki.bot>

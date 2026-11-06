@@ -1,4 +1,4 @@
-﻿# Windows port notes
+# Windows port notes
 
 This is the port-notes document for the unofficial Windows build of Poki.
 It records what changed, why, and what does **not** work. Upstream:
@@ -11,24 +11,24 @@ RemoteXPC to the device services, plus `xcrun` for the pieces the bridge does
 not cover. None of that exists on Windows: there is no Xcode, no
 `xcrun devicectl`, no Vision OCR helper and no simulator runtime.
 
-This port keeps everything above the device layer 鈥?the MCP server, the tool
-catalog, the coordination layer, the prompts 鈥?and replaces the device layer
+This port keeps everything above the device layer - the MCP server, the tool
+catalog, the coordination layer, the prompts - and replaces the device layer
 with **WebDriverAgent over HTTP**, opened through go-ios.
 
 | Layer | Upstream (macOS) | This port (Windows) |
 | --- | --- | --- |
 | Developer tunnel (iOS 17+) | Rust bridge / `pymobiledevice3` | `ios.exe tunnel start --userspace` |
 | App launch / test session | `xcrun devicectl` | `ios.exe runwda` (testmanagerd) |
-| Automation transport | Rust bridge 鈫?RemoteXPC | WebDriverAgent HTTP on `127.0.0.1:8100` |
+| Automation transport | Rust bridge -> RemoteXPC | WebDriverAgent HTTP on `127.0.0.1:8100` |
 | Screenshots | `idevice-tools screenshot` | WDA `/screenshot` |
 | Accessibility tree | Rust bridge `ax` | WDA `/source?format=json` |
-| Input | HID reports over the bridge | WDA `/wda/tap`, `/wda/keys`, 鈥?|
+| Input | HID reports over the bridge | WDA `/wda/tap`, `/wda/keys`, ... |
 | Simulator, OCR, recording | yes | no |
 
 ## Why WebDriverAgent
 
-WDA already exposes exactly the primitives Poki's bridge exposes 鈥?a tree, a
-screenshot, taps in points, text input, hardware buttons, app launch 鈥?and it is
+WDA already exposes exactly the primitives Poki's bridge exposes - a tree, a
+screenshot, taps in points, text input, hardware buttons, app launch - and it is
 the one automation surface that works on Windows without Xcode. The bridge's
 request/response contract is small, so a backend can implement it in ~240 lines
 and nothing above it needs to know which transport is in use.
@@ -64,7 +64,7 @@ with `ios.exe apps` if you are unsure.
 
 The tunnel info port defaults to **28100** in go-ios 1.3.x. If another service
 already answers on the port `runwda` assumes, it fails with a 502 from an
-unrelated listener 鈥?pass `--tunnel-info-port` explicitly if you change it.
+unrelated listener - pass `--tunnel-info-port` explicitly if you change it.
 
 ## Code changes
 
@@ -79,7 +79,8 @@ unrelated listener 鈥?pass `--tunnel-info-port` explicitly if you change it.
 | `src/data/tools.json` | tool descriptions for the WDA device (`wda` id). |
 | `package.json` | description only; upstream version and dependencies unchanged. |
 
-The complete diff against upstream is the `windows` branch itself: `git diff origin/main...windows`.
+The complete diff against upstream is the `windows` branch itself:
+`git diff origin/main...windows`.
 
 ### Behaviour notes
 
@@ -123,9 +124,9 @@ device.
 | --- | --- | --- |
 | `Failed looking up pid of launched process` | phone locked, or a system prompt (trust / passcode) is on screen | unlock, dismiss the prompt, retry |
 | WDA session creation hangs | same as above; WDA waits for the app to become active | act on the phone, then retry |
-| `web inspector is not enabled` | using `ios webinspector` | enable Settings 鈫?Safari 鈫?Advanced 鈫?Web Inspector, or stay on the WDA path |
+| `web inspector is not enabled` | using `ios webinspector` | enable Settings > Safari > Advanced > Web Inspector, or stay on the WDA path |
 | 502 from port 60105 | another service owns the port go-ios falls back to | pin the tunnel info port (28100) |
-| Screenshot is 375脳812 but taps miss | stale scale cache | restart the server; the backend recomputes scale from the first screenshot |
+| Screenshot is 375x812 but taps miss | stale scale cache | restart the server; the backend recomputes scale from the first screenshot |
 
 ## Verification
 
@@ -134,10 +135,9 @@ iPhone 11 Pro / iOS 18.5, WDA 16.15.2:
 
 - tunnel + forward: working
 - `list_devices`: `iPhone (WebDriverAgent)`
-- `take_screenshot`: 1125脳2436 PNG
+- `take_screenshot`: 1125 x 2436 PNG
 - `list_elements`: full accessibility tree
 - Safari launch + navigation: working
 
 Input operations are implemented against the WDA endpoints but have not been
 exercised in a recorded run; treat them as beta.
-
