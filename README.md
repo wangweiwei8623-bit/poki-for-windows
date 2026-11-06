@@ -24,6 +24,9 @@ operates the phone the way you do.
 > Windows there is no Xcode, so this port replaces that device layer with
 > **go-ios + WebDriverAgent over HTTP** and leaves the MCP server, tools and
 > prompts untouched. The port notes are in [WINDOWS.md](WINDOWS.md).
+>
+> This is a standalone fork: the Windows work is **not** intended to be merged upstream.
+> Please open issues and pull requests here, not in the upstream repository.
 
 ## How it works
 
