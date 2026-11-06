@@ -1,29 +1,13 @@
 import { spawn } from 'node:child_process';
-import { once } from 'node:events';
 import { mkdir, readFile, lstat, unlink } from 'node:fs/promises';
 import { createConnection } from 'node:net';
 import { createInterface } from 'node:readline';
 import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 import { root, stateDir } from './config.mjs';
-import { checkWork, signal, phase } from './work.mjs';
+import { checkWork, signal } from './work.mjs';
 
 const starting = new Map();
-const localHelpers = new Map();
-const readOnly = new Set(['ax_tree', 'screenshot', 'device_info', 'display_info', 'list_apps']);
-let closing = false;
-
-async function stopLocalHelper({ child, exited }) {
-  child.kill('SIGTERM');
-  const escalation = setTimeout(() => child.kill('SIGKILL'), 1000);
-  try { await exited; }
-  finally { clearTimeout(escalation); }
-}
-
-export async function closeLocalHelpers() {
-  closing = true;
-  await Promise.allSettled([...localHelpers.values()].map(stopLocalHelper));
-}
 
 export async function remoteDevices() {
   let configs;
@@ -46,35 +30,21 @@ function connect(path) {
 
 async function socketFor(target) {
   // macOS Unix socket names are limited to 104 bytes, regardless of the state directory's length.
-  if (!target.remote && closing) throw new Error('Local native helpers are shutting down.');
-  const directory = `/tmp/poki-${target.remote ? 'remote' : 'native'}-${process.getuid()}`;
+  const directory = `/tmp/poki-remote-${process.getuid()}`;
   await mkdir(directory, { mode: 0o700, recursive: true });
   const info = await lstat(directory);
   if (!info.isDirectory() || info.uid !== process.getuid() || (info.mode & 0o077)) throw new Error('Remote socket directory must be private and owned by this user.');
-  const path = join(directory, createHash('sha256').update(target.remote ?? JSON.stringify([root, stateDir, process.pid, target.id])).digest('hex').slice(0, 24) + '.sock');
-  try { return { socket: await connect(path), path }; }
+  const path = join(directory, createHash('sha256').update(target.remote).digest('hex').slice(0, 24) + '.sock');
+  try { return await connect(path); }
   catch (error) { if (!['ENOENT', 'ECONNREFUSED'].includes(error.code)) throw error; }
   if (!starting.has(path)) {
     const started = (async () => {
-      const previous = localHelpers.get(path);
-      if (previous) await stopLocalHelper(previous);
       try {
         const stale = await lstat(path);
         if (!stale.isSocket() || stale.uid !== process.getuid()) throw new Error('Unexpected file at the remote socket path.');
         await unlink(path);
       } catch (error) { if (error.code !== 'ENOENT') throw error; }
-      if (!target.remote && closing) throw new Error('Local native helpers are shutting down.');
-      const args = target.remote ? ['--remote-server', target.remote, path] : ['--local-server', target.id, path];
-      const child = spawn(join(root, 'build/poki-native'), args, { detached: Boolean(target.remote), stdio: [target.remote ? 'ignore' : 'pipe', 'pipe', process.env.POKI_MCP_NATIVE_TRACE ? 'inherit' : 'ignore'] });
-      if (process.env.POKI_MCP_NATIVE_TRACE) console.error(JSON.stringify({ event: 'native_helper_started', pid: child.pid, transport: target.remote ? 'remote' : 'local' }));
-      if (!target.remote) {
-        const exited = once(child, 'exit').catch(() => {}).then(async () => {
-          await unlink(path).catch(() => {});
-          if (localHelpers.get(path)?.child === child) localHelpers.delete(path);
-        });
-        localHelpers.set(path, { child, exited });
-        child.stdin.on('error', () => {});
-      }
+      const child = spawn(join(root, 'build/poki-native'), ['--remote-server', target.remote, path], { detached: true, stdio: ['ignore', 'pipe', 'ignore'] });
       const lines = createInterface({ input: child.stdout });
       try {
         await new Promise((resolve, reject) => {
@@ -90,15 +60,15 @@ async function socketFor(target) {
     started.finally(() => starting.delete(path)).catch(() => {});
   }
   await starting.get(path);
-  return { socket: await connect(path), path };
+  return connect(path);
 }
 
-export async function nativeRequest(target, request) {
+export async function remoteRequest(target, request) {
   checkWork();
   const callerSignal = signal();
-  const { socket, path } = await phase('native_helper', () => socketFor(target));
+  const socket = await socketFor(target);
   try { checkWork(); } catch (error) { socket.destroy(); throw error; }
-  return phase('native_request', () => new Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     const lines = createInterface({ input: socket });
     let pid, outcome, abortReason;
     const abort = reason => {
@@ -119,18 +89,14 @@ export async function nativeRequest(target, request) {
         socket.write(JSON.stringify(request) + '\n');
       } else { outcome = value; socket.end(); }
     });
-    const helperName = target.remote ? 'Remote' : 'Native';
-    socket.on('error', () => { abortReason ??= new Error(!target.remote && readOnly.has(request.op) ? 'Native helper connection closed during a read.' : `${helperName} helper connection closed. Input may have been delivered; inspect before retrying.`); });
-    socket.once('close', async () => {
+    socket.on('error', () => { abortReason ??= new Error('Remote connection closed. Input may have been delivered; inspect before retrying.'); });
+    socket.once('close', () => {
       clearTimeout(timer); lines.close();
       callerSignal?.removeEventListener('abort', onAbort);
-      // A local helper finishes an abandoned read before serving anyone else, so end it as a one-shot read would end.
-      const helper = !target.remote && pid && !outcome && abortReason && readOnly.has(request.op) && localHelpers.get(path);
-      if (helper && helper.child.pid === pid) await stopLocalHelper(helper);
       if (abortReason) reject(abortReason);
-      else if (!outcome) reject(new Error(`${helperName} helper closed without confirming the action. Inspect before retrying input.`));
+      else if (!outcome) reject(new Error('Remote helper closed without confirming the action. Inspect before retrying input.'));
       else if (outcome.transport_error) reject(new Error(outcome.error ?? 'Remote operation failed.'));
       else resolve(outcome);
     });
-  }));
+  });
 }

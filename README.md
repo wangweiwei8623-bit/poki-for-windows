@@ -1,187 +1,166 @@
-<p align="center">
+﻿<p align="center">
   <img src="docs/images/poki-icon.png" width="72" height="72" alt="Poki icon">
 </p>
 
-<h1 align="center">Poki uses your iPhone like you do</h1>
+<h1 align="center">Poki for Windows</h1>
 
 <p align="center">
-  <img src="docs/images/poki-home.gif" width="720" alt="Poki website home page animation">
+  English | <a href="README.zh-CN.md">绠€浣撲腑鏂?/a>
 </p>
 
-<p align="center">
-  English | <a href="README.zh-CN.md">简体中文</a> | <a href="README.zh-TW.md">繁體中文</a> | <a href="README.ja.md">日本語</a> | <a href="README.ko.md">한국어</a> | <a href="README.es.md">Español</a><br>
-  <a href="https://poki.bot">poki.bot</a>
-</p>
-
-<!-- badges:start -->
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0--only-blue" alt="License: AGPL-3.0-only"></a>
-  <a href="https://github.com/JosssphZhou/poki/stargazers"><img src="https://img.shields.io/github/stars/JosssphZhou/poki" alt="GitHub stars"></a>
-  <a href="https://github.com/JosssphZhou/poki/forks"><img src="https://img.shields.io/github/forks/JosssphZhou/poki" alt="GitHub forks"></a>
-  <a href="https://github.com/JosssphZhou/poki/issues"><img src="https://img.shields.io/github/issues/JosssphZhou/poki" alt="GitHub issues"></a>
-  <a href="https://github.com/JosssphZhou/poki/releases"><img src="https://img.shields.io/github/v/release/JosssphZhou/poki" alt="Latest release"></a>
-  <img src="https://img.shields.io/badge/platform-macOS%20%7C%20iOS-lightgrey" alt="Platform: macOS and iOS">
+  <img src="https://img.shields.io/badge/platform-Windows%20%7C%20iOS-lightgrey" alt="Platform: Windows and iOS">
 </p>
-<!-- badges:end -->
+
+**Control a real iPhone from an MCP agent on a Windows host 鈥?no Mac, no Xcode,
+no jailbreak, no extra hardware.** Poki exposes the iPhone's accessibility tree
+and touch/keyboard input to any MCP client through a local server, so an agent
+operates the phone the way you do.
+
+> This repository is an **unofficial Windows port** of
+> [JosssphZhou/poki](https://github.com/JosssphZhou/poki). Upstream targets macOS
+> and talks to the phone through a Rust bridge built with Xcode tooling. On
+> Windows there is no Xcode, so this port replaces that device layer with
+> **go-ios + WebDriverAgent over HTTP** and leaves the MCP server, tools and
+> prompts untouched. The port notes are in [WINDOWS.md](WINDOWS.md).
+
+## How it works
+
+```text
+MCP client (Aidi, Claude Code, Codex, 鈥?
+        鈹? streamable HTTP + bearer token, 127.0.0.1 only
+        鈻?Poki MCP server  (Node.js 24, src/daemon.mjs)
+        鈹? POKI_WDA_URL=http://127.0.0.1:8100
+        鈻?WebDriverAgent (XCUITest runner signed onto the iPhone)
+        鈻?        鈹? XCTest / testmanagerd over the iOS 17+ developer tunnel
+go-ios  (userspace tunnel on 28100, `ios forward` for 8100)
+        鈹? USB
+        鈻?iPhone
+```
+
+Three pieces replace the Mac:
+
+1. **go-ios** opens the iOS 17+ developer tunnel and starts WebDriverAgent
+   through `testmanagerd` 鈥?the same path Xcode uses, without Xcode.
+2. **WebDriverAgent** is signed and installed once with a free Apple ID
+   (Sideloadly does the signing on Windows), then driven over plain HTTP.
+3. **Poki** gains a third device backend, [src/backends/wda.mjs](src/backends/wda.mjs),
+   selected by `POKI_WDA_URL`. Every tool keeps its upstream request/response
+   shape, so nothing above the backend changes.
+
+## Requirements
+
+- Windows 10/11 x64
+- Node.js 24+
+- Apple mobile-device drivers (iTunes or Apple Devices; Sideloadly installs its
+  own `usbmuxd`, which go-ios also uses)
+- [go-ios](https://github.com/danielpaulus/go-ios) 1.3.x (`ios.exe`)
+- [Sideloadly](https://sideloadly.io/) + any free Apple ID, to sign WebDriverAgent
+- An iPhone on iOS 17+ with Developer Mode on, connected over USB
 
 ## Quick start
 
-**Let your agent install it.** Copy this to your agent:
+```powershell
+git clone https://github.com/wangweiwei8623-bit/poki-for-windows.git
+cd poki-for-windows
+npm ci
 
-```text
-Install https://github.com/JosssphZhou/poki following its root AGENTS.md, including the MCP skill, and stop whenever you need me to act.
+# 1. sign and install WebDriverAgent once (Sideloadly, see docs/install-windows.md)
+# 2. open the developer tunnel
+.\goios\ios.exe tunnel start --userspace
+
+# 3. start WebDriverAgent (keep this window open)
+.\goios\ios.exe runwda `
+  --bundleid=com.facebook.WebDriverAgentRunner.xctrunner.<TEAM_ID> `
+  --testrunnerbundleid=com.facebook.WebDriverAgentRunner.xctrunner.<TEAM_ID> `
+  --xctestconfig=WebDriverAgentRunner.xctest
+
+# 4. expose WDA on 8100
+.\goios\ios.exe forward 8100 8100
+
+# 5. start the MCP server
+$env:POKI_WDA_URL = 'http://127.0.0.1:8100'
+$env:POKI_MCP_STATE_DIR = "$env:USERPROFILE\Library\Application Support\PokiMCP"
+node src\daemon.mjs --port 47825
 ```
 
-**Poki MCP.** Already using Claude Code, Codex, or another MCP client? Connect Poki MCP and use your own subscription. No extra model account needed.
+The server writes its endpoint and bearer token to
+`%USERPROFILE%\Library\Application Support\PokiMCP\mcp.json` (override with
+`POKI_MCP_STATE_DIR`). Point your MCP client at that URL, or register the stdio
+bridge: `node src\stdio.mjs`.
 
-Start the server and keep it running:
+Check it:
 
-```sh
-git clone https://github.com/JosssphZhou/poki.git
-cd poki
-./bin/setup
-npm start
+```powershell
+curl.exe -s -H "Authorization: Bearer <token>" http://127.0.0.1:47825/mcp ...
+node bin/call.mjs list_devices
 ```
 
-Requires macOS 15 or later, full Xcode, Rust, Node.js 24+, and ffmpeg. `./bin/setup` checks for missing dependencies. The initial build takes a few minutes.
+`list_devices` reports a single device, `iPhone (WebDriverAgent)`, whose id is
+`wda`.
 
-Poki targets macOS. For Linux, see the community port [poki-for-linux](https://github.com/carrotciallo/poki-for-linux) ([#16](https://github.com/JosssphZhou/poki/issues/16)), maintained outside this repo.
+## What the WDA backend supports
 
-### Prebuilt macOS arm64 package
+| Operation | Status |
+| --- | --- |
+| `list_devices`, `get_device_info` | works (one virtual device, `wda`) |
+| `take_screenshot`, screen scale | works 鈥?scale is derived from the WDA screenshot |
+| `list_elements` (accessibility tree) | works |
+| `tap`, `double_tap`, `long_press`, `swipe`/`drag`, `pinch` | implemented |
+| `type_text`, `press_key` (Return / Backspace) | implemented |
+| `press_button` (Home, volume) | implemented |
+| `launch_app` by bundle id | implemented |
+| `list_apps`, `configuration`, modifier keys | not exposed by WDA |
+| iOS Simulator, screen recording, OCR helper | not available on this port |
 
-Download `poki-v0.1.1-macos-arm64.tar.gz` from the release and run:
+## Verified on real hardware
 
-```sh
-tar -xzf poki-v0.1.1-macos-arm64.tar.gz
-cd poki-v0.1.1
-npm ci --no-audit --no-fund
-npm start
-```
+Host: Windows 11 x64, Node.js 24.22.1, go-ios 1.3.2.
+Device: iPhone 11 Pro, iOS 18.5, WebDriverAgent 16.15.2.
 
-The package includes the native bridge and idevice tools. You do not need Rust or `./bin/setup`. You still need macOS on Apple Silicon, full Xcode, Node.js 24+, Python 3, and ffmpeg. Register your MCP client and install the optional Agent as described below.
+| Check | Result |
+| --- | --- |
+| Developer tunnel + `ios forward 8100` | works |
+| `list_devices` 鈫?`iPhone (WebDriverAgent)` | works |
+| `take_screenshot` | works (1125脳2436 PNG) |
+| `list_elements` / WDA `source` | works |
+| Launch Safari and navigate to a URL | works |
+| `tap` / `type_text` | implemented, not yet exercised in a recorded run |
 
-In another terminal, from the same directory, register the MCP server:
+## Known limitations
 
-```sh
-claude mcp add --scope user poki-mcp -- node "$PWD/src/stdio.mjs"   # Claude Code
-codex mcp add poki-mcp -- node "$PWD/src/stdio.mjs"                 # Codex
-```
-
-**Poki Agent.** For Poki's standalone terminal agent or messaging channels, keep `npm start` running and open another terminal in the same directory. Install the agent, add its command to this terminal's path, and sign in:
-
-```sh
-npm ci --prefix agent
-export PATH="$PWD/bin:$PATH"
-poki login
-poki status
-```
-
-Poki Agent uses GPT-6.1 Terra (`gpt-6.1-terra`) with low reasoning by default. We recommend keeping it: it is the fastest setup we have tested for phone tasks. Override it with `POKI_AGENT_MODEL`; see [Run Poki Agent](agent/README.md).
-
-For a physical iPhone, pair it with your Mac over USB first. See [Physical iPhone setup](docs/physical-iphone.md).
-
-Update with `./bin/poki update`. Set `POKI_NO_UPDATE_CHECK=1` to disable the daily anonymous GitHub release check. See [Update](AGENTS.md#update) for the request URL, restart steps, and prebuilt packages.
-
-## Try a task
-
-With Poki Agent, one connected iPhone is selected automatically. With multiple devices, add `--device '<device UUID>'`.
-
-```sh
-node bin/call.mjs list_devices   # Find your device UUID
-poki "Search esp32 in Chrome and summarize the top result"
-```
-
-> **Note:** Poki controls your real iPhone. If you ask it to send messages or make payments, it will. Screen contents are sent to your configured model service.
-
-Gets faster with use: Poki Agent remembers past tasks and runs them faster on repeat.
-
-**Channels:** After configuring an authorized channel, start it with `poki imessage` or `poki telegram`. See [Poki Agent](agent/README.md) for setup.
-
-**MCP clients:** Claude Code, Codex, and any client supporting `mcpServers` JSON.
-
-Physical iPhone support has been verified only on iPhones using the Chinese interface. Physical devices support portrait orientation only. App container export and direct links to Settings subpages are unavailable. See [verification and known limits](docs/verification.md).
+- **Seven-day signature.** A free Apple ID signs WebDriverAgent for seven days;
+  after that the app must be re-signed and reinstalled.
+- **The phone must be unlocked.** With the screen locked, app launches and
+  sessions fail; the port cannot unlock a passcode-protected phone.
+- **One device.** The WDA backend exposes exactly one device per server.
+- **No simulator, no OCR.** The macOS-only helpers are skipped; observation
+  relies on the accessibility tree and screenshots.
+- **Daemon is loopback-only.** This port simplified upstream's
+  `POKI_BIND_HOST`/`POKI_HOST_ALLOW` multi-bind logic to a single `127.0.0.1`
+  listener.
 
 ## Docs
 
 | Topic | Read |
 | --- | --- |
-| Installation, other MCP clients, and troubleshooting | [Install guide](docs/install.md) |
-| Poki Agent, models, iMessage, and Telegram | [Run Poki Agent](agent/README.md) |
-| MCP tool reference | [Tool behavior](docs/tools.md) |
-| Environment variables and sessions | [Configuration](docs/configuration.md) |
-| USB pairing, Developer Mode, and Wi-Fi | [Physical iPhone setup](docs/physical-iphone.md) |
-| Test results, known limits, and disclaimers | [Verification](docs/verification.md) |
-| Bridge architecture | [Native bridge](native/NATIVE.md) and [simulator adapter](native/simulator.md) |
-| Roadmap | [poki.bot](https://poki.bot) |
+| Port notes, code changes, differences from upstream | [WINDOWS.md](WINDOWS.md) |
+| Full Windows installation | [docs/install-windows.md](docs/install-windows.md) |
+| Upstream concepts and tool reference | [docs/tools.md](docs/tools.md), [docs/physical-iphone.md](docs/physical-iphone.md) |
 
-## Roadmap
+## Security
 
-<p align="center">
-  <img src="docs/images/roadmap.png" width="860" alt="Poki roadmap. Shipped: Poki MCP, Poki Agent, iMessage and Terminal integrations, self-learning routes, remote connections. In Progress: persistent connection performance improvements, Telegram integration, native text input (clipboard-free), simplified tool interface. Planned: Poki App, which runs locally on iPhone and is available while your Mac is powered off. Future: iPhone Duo support, physical device support (no Xcode required), additional model providers.">
-</p>
+Poki drives your real iPhone: it can tap, type, send messages and open apps.
+Screen contents are sent to your configured model service. The MCP endpoint
+binds to `127.0.0.1` and requires a 32-byte bearer token written to `mcp.json`
+with user-only permissions. Treat that token like a password.
 
-## Star History
+## License and provenance
 
-<a href="https://www.star-history.com/?repos=JosssphZhou%2Fpoki&type=date&legend=top-left">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=JosssphZhou/poki&type=date&theme=dark&legend=top-left">
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=JosssphZhou/poki&type=date&legend=top-left">
-    <img alt="Star History chart" src="https://api.star-history.com/chart?repos=JosssphZhou/poki&type=date&legend=top-left">
-  </picture>
-</a>
+AGPL-3.0-only, inherited from upstream. This is a modified fork; see
+[NOTICE.md](NOTICE.md) for what changed and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)
+for bundled dependencies.
 
-## Core contributors
+Upstream: <https://github.com/JosssphZhou/poki> 路 <https://poki.bot>
 
-<table>
-  <tbody>
-    <tr>
-      <td align="center" valign="top" width="50%"><a href="https://github.com/igc110"><img src="https://avatars.githubusercontent.com/u/241411380?v=4&size=240" width="120" height="120" alt="igc110"/><br /><sub><b>igc110</b></sub></a><br />Measured each stage in <a href="https://github.com/JosssphZhou/poki/issues/10">#10</a> and found why a tap on a physical iPhone took about 7 seconds: every request read the screen back and started a new poki-native process. The fix that followed made taps on a physical iPhone about a third faster.</td>
-      <td align="center" valign="top" width="50%"><a href="https://github.com/ZhehanZhang"><img src="https://avatars.githubusercontent.com/u/67270559?v=4&size=240" width="120" height="120" alt="ZhehanZhang"/><br /><sub><b>ZhehanZhang</b></sub></a><br />Proposed driving a physical iPhone over Tailscale in <a href="https://github.com/JosssphZhou/poki/issues/2">#2</a>, the idea behind remote connections (<a href="https://github.com/JosssphZhou/poki/pull/8">#8</a>).</td>
-    </tr>
-  </tbody>
-</table>
-
-## Thanks
-
-Thanks to everyone who opened an issue or pull request. Your feedback and fixes make Poki better.
-
-<!-- THANKS-WALL:START -->
-<table>
-  <tbody>
-    <tr>
-      <td align="center" valign="top" width="20%"><a href="https://github.com/ZhehanZhang"><img src="https://avatars.githubusercontent.com/u/67270559?v=4&size=160" width="80" height="80" alt="ZhehanZhang"/><br /><sub><b>ZhehanZhang</b></sub></a></td>
-      <td align="center" valign="top" width="20%"><a href="https://github.com/carrotciallo"><img src="https://avatars.githubusercontent.com/u/69567867?v=4&size=160" width="80" height="80" alt="carrotciallo"/><br /><sub><b>carrotciallo</b></sub></a></td>
-      <td align="center" valign="top" width="20%"><a href="https://github.com/edge369"><img src="https://avatars.githubusercontent.com/u/63720633?v=4&size=160" width="80" height="80" alt="edge369"/><br /><sub><b>edge369</b></sub></a></td>
-      <td align="center" valign="top" width="20%"><a href="https://github.com/guangtouge82"><img src="https://avatars.githubusercontent.com/u/269691899?v=4&size=160" width="80" height="80" alt="guangtouge82"/><br /><sub><b>guangtouge82</b></sub></a></td>
-      <td align="center" valign="top" width="20%"><a href="https://github.com/igc110"><img src="https://avatars.githubusercontent.com/u/241411380?v=4&size=160" width="80" height="80" alt="igc110"/><br /><sub><b>igc110</b></sub></a></td>
-    </tr>
-    <tr>
-      <td align="center" valign="top" width="20%"><a href="https://github.com/kilingzhang"><img src="https://avatars.githubusercontent.com/u/17439300?v=4&size=160" width="80" height="80" alt="kilingzhang"/><br /><sub><b>kilingzhang</b></sub></a></td>
-      <td align="center" valign="top" width="20%"><a href="https://github.com/makirqi-alt"><img src="https://avatars.githubusercontent.com/u/295395617?v=4&size=160" width="80" height="80" alt="makirqi-alt"/><br /><sub><b>makirqi-alt</b></sub></a></td>
-      <td align="center" valign="top" width="20%"><a href="https://github.com/mawenhao1028"><img src="https://avatars.githubusercontent.com/u/70818670?v=4&size=160" width="80" height="80" alt="mawenhao1028"/><br /><sub><b>mawenhao1028</b></sub></a></td>
-      <td align="center" valign="top" width="20%"><a href="https://github.com/zcyoung2000"><img src="https://avatars.githubusercontent.com/u/62181891?v=4&size=160" width="80" height="80" alt="zcyoung2000"/><br /><sub><b>zcyoung2000</b></sub></a></td>
-    </tr>
-  </tbody>
-</table>
-<!-- THANKS-WALL:END -->
-
-## Disclaimer
-
-Poki is an independent open source project. It is not affiliated with, or endorsed by, Apple, OpenAI, or the makers of any app or website it operates. iPhone is a trademark of Apple Inc.
-
-Automating third-party apps and websites may violate their terms of service. Decide for yourself whether to use Poki with a given service. You are responsible for what it does on your device and accounts, including messages it sends, changes it makes, and any account restrictions that result.
-
-Poki is provided "as is", without warranty, as set out in the AGPL-3.0 license.
-
-## License
-
-Poki is open source under the [AGPL-3.0-only license](LICENSE).
-
-Copyright (c) 2026 Joseph Zhou and contributors. Open-source dependencies retain their respective licenses; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). To contribute, see [CONTRIBUTING.md](CONTRIBUTING.md).
-
-## Acknowledgments
-
-<p align="center">
-  <img src="docs/images/acknowledgments.png" width="860" alt="Built on open source: pi, idevice, idb, BlueBubbles, Hermes Agent, MCP SDK, sharp, and FFmpeg"><br>
-  <sub>Open source acknowledgments: <a href="https://github.com/earendil-works/pi">pi</a> | <a href="https://github.com/jkcoxson/idevice">idevice</a> | <a href="https://github.com/facebook/idb">idb</a> | <a href="https://github.com/BlueBubblesApp/bluebubbles-server">BlueBubbles</a> | <a href="https://github.com/NousResearch/hermes-agent">Hermes Agent</a> | <a href="https://github.com/modelcontextprotocol/typescript-sdk">MCP SDK</a> | <a href="https://github.com/lovell/sharp">sharp</a> | <a href="https://github.com/FFmpeg/FFmpeg">FFmpeg</a></sub>
-</p>

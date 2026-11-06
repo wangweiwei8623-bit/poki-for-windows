@@ -75,7 +75,6 @@ export async function startRecording(ctx, target) {
   checkWork();
   const active = recordings(ctx);
   if (active.has(target.id)) throw new Error('This device is already recording. Call stop_recording first.');
-  if (target.kind === 'physical') await ctx.bridge({ op: 'release_input' });
   const directory = join(homedir(), 'Movies', 'Poki MCP');
   await mkdir(directory, { recursive: true, mode: 0o700 }); checkWork();
   const path = join(directory, `${new Date().toISOString().replaceAll(':', '-')}-${randomUUID().slice(0, 8)}.mov`);
@@ -113,7 +112,7 @@ export async function prepareRecordingInput(ctx, target) {
 export async function resumeRecordings(ctx, target) {
   const session = recordings(ctx).get(target.id);
   if (!session || target.kind === 'simulator') return;
-  try { checkWork(); await ctx.bridge({ op: 'release_input' }); await recover(session, signal()); }
+  try { checkWork(); await recover(session, signal()); }
   finally { session.inputPending = false; }
 }
 export async function stopRecording(ctx, target) {

@@ -35,12 +35,7 @@ function advice(reason, failedStep) {
 // A batch is one queued operation, so its steps share a device lookup. A touch is compared with the
 // screen before it; the screen itself is read back once, after the last step.
 export async function runBatch(ctx, args) {
-  const commands = args.commands.map(command => {
-    const tool = stepTool(command.tool);
-    const supportsVerification = definitions.find(([name]) => name === tool)?.[2].shape?.verify;
-    return { ...command, tool, ...(args.verify === false && supportsVerification ? { arguments: { verify: false, ...command.arguments } } : {}) };
-  });
-  const unverified = commands.some(command => command.arguments?.verify === false);
+  const commands = args.commands.map(command => ({ ...command, tool: stepTool(command.tool) }));
   const stopOnError = args.stop_on_error !== false;
   const invalid = stopOnError ? commands.findIndex(invalidStep) : -1;
   if (invalid >= 0) {
@@ -80,13 +75,13 @@ export async function runBatch(ctx, args) {
       if (changesDevice.has(command.tool)) ctx.resolved = undefined;
     }
   } finally { ctx.inBatch = false; }
-  const summary = unverified ? { verified: false } : {};
+  const summary = {};
   // Reading a simulator that a step just shut down would boot it again.
   const last = commands.slice(0, ran).findLast(command => !offDevice.has(command.tool));
   if (last && last.tool !== 'shut_down_simulator') {
     // dispatch restores both when this batch ends.
     if (last.arguments?.device) { ctx.requested = last.arguments.device; ctx.resolved = undefined; }
-    const { screen, stop_reason } = await phase('batch_readback', () => ctx.readback(undefined, { once: unverified }));
+    const { screen, stop_reason } = await phase('batch_readback', () => ctx.readback());
     stopReason ??= stop_reason;
     summary.screen = screen;
   }

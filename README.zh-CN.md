@@ -1,187 +1,121 @@
-<p align="center">
+﻿<p align="center">
   <img src="docs/images/poki-icon.png" width="72" height="72" alt="Poki icon">
 </p>
 
-<h1 align="center">Poki 像你一样使用你的 iPhone</h1>
+<h1 align="center">Poki for Windows</h1>
 
 <p align="center">
-  <img src="docs/images/poki-home.gif" width="720" alt="Poki 官网首页动画">
-</p>
+  <a href="README.md">English</a> | 绠€浣撲腑鏂?</p>
 
-<p align="center">
-  <a href="README.md">English</a> | 简体中文 | <a href="README.zh-TW.md">繁體中文</a> | <a href="README.ja.md">日本語</a> | <a href="README.ko.md">한국어</a> | <a href="README.es.md">Español</a><br>
-  <a href="https://poki.bot">poki.bot</a>
-</p>
-
-<!-- badges:start -->
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0--only-blue" alt="License: AGPL-3.0-only"></a>
-  <a href="https://github.com/JosssphZhou/poki/stargazers"><img src="https://img.shields.io/github/stars/JosssphZhou/poki" alt="GitHub stars"></a>
-  <a href="https://github.com/JosssphZhou/poki/forks"><img src="https://img.shields.io/github/forks/JosssphZhou/poki" alt="GitHub forks"></a>
-  <a href="https://github.com/JosssphZhou/poki/issues"><img src="https://img.shields.io/github/issues/JosssphZhou/poki" alt="GitHub issues"></a>
-  <a href="https://github.com/JosssphZhou/poki/releases"><img src="https://img.shields.io/github/v/release/JosssphZhou/poki" alt="Latest release"></a>
-  <img src="https://img.shields.io/badge/platform-macOS%20%7C%20iOS-lightgrey" alt="Platform: macOS and iOS">
+  <img src="https://img.shields.io/badge/platform-Windows%20%7C%20iOS-lightgrey" alt="Platform: Windows and iOS">
 </p>
-<!-- badges:end -->
 
-## 快速开始
+**鍦?Windows 涓婏紝璁╀换鎰?MCP Agent 鐩存帴鎿嶄綔涓€鍙扮湡 iPhone鈥斺€斾笉闇€瑕?Mac銆佷笉闇€瑕?Xcode銆佷笉瓒婄嫳銆佷笉鍔犵‖浠躲€?*
 
-**让 agent 帮你安装。** 把这段发给你的 agent：
+Poki 閫氳繃鏈湴鏈嶅姟鎶?iPhone 鐨勬棤闅滅鏍戙€佺偣鍑汇€佹粦鍔ㄣ€佽緭鍏ユ毚闇叉垚 MCP 宸ュ叿锛?Agent 灏辫兘鍍忎汉涓€鏍风敤杩欏彴鎵嬫満銆?
+> 鏈粨搴撴槸 [JosssphZhou/poki](https://github.com/JosssphZhou/poki) 鐨?*闈炲畼鏂?Windows 绉绘**銆?> 涓婃父闈㈠悜 macOS锛岃澶囧眰渚濊禆 Rust 妗ュ拰 Xcode 宸ュ叿閾撅紱Windows 涓婃病鏈?Xcode锛?> 鎵€浠ヨ繖閲屾妸璁惧灞傛崲鎴愪簡 **go-ios + WebDriverAgent锛圚TTP锛?*锛?> MCP 鏈嶅姟銆佸伐鍏峰畾涔夊拰鎻愮ず璇嶉兘淇濇寔涓婃父鍘熸牱銆傜Щ妞嶇粏鑺傝 [WINDOWS.md](WINDOWS.md)銆?
+## 鍘熺悊
 
 ```text
-安装 https://github.com/JosssphZhou/poki，按根目录 AGENTS.md 配好 MCP 和使用技能，遇到必须由我操作的步骤就停下来告诉我。
+MCP 瀹㈡埛绔紙Aidi銆丆laude Code銆丆odex鈥︹€︼級
+        鈹? streamable HTTP + Bearer Token锛屼粎鐩戝惉 127.0.0.1
+        鈻?Poki MCP 鏈嶅姟锛圢ode.js 24锛宻rc/daemon.mjs锛?        鈹? POKI_WDA_URL=http://127.0.0.1:8100
+        鈻?WebDriverAgent锛堢杩?iPhone 鐨?XCUITest runner锛?        鈻?        鈹? XCTest / testmanagerd锛岃蛋 iOS 17+ 寮€鍙戣€呴毀閬?go-ios锛?8100 鐨勭敤鎴锋€侀毀閬擄紝鐢?`ios forward` 鏄犲皠 8100锛?        鈹? USB
+        鈻?iPhone
 ```
 
-**Poki MCP。** 已经在用 Claude Code、Codex 或其他 MCP 客户端？接入 Poki MCP，直接用你自己的订阅，不需要另外登录模型账号。
+鐢ㄤ笁鏍蜂笢瑗挎浛浠?Mac锛?
+1. **go-ios** 寤虹珛 iOS 17+ 寮€鍙戣€呴毀閬擄紝骞堕€氳繃 `testmanagerd` 鎷夎捣
+   WebDriverAgent鈥斺€斿拰 Xcode 璧扮殑鏄悓涓€鏉¤矾锛屽彧鏄笉闇€瑕?Xcode銆?2. **WebDriverAgent** 鐢ㄥ厤璐?Apple ID 绛惧悕銆佽涓€娆★紱鍦?Windows 涓婄敤 Sideloadly
+   瀹屾垚绛惧悕锛屼箣鍚庡氨鏄函 HTTP 璋冪敤銆?3. **Poki** 澧炲姞绗笁涓澶囧悗绔?[src/backends/wda.mjs](src/backends/wda.mjs)锛?   鐢?`POKI_WDA_URL` 閫夋嫨銆傛墍鏈夊伐鍏风殑鍏ュ弬鍑哄弬淇濇寔涓婃父缁撴瀯锛屽悗绔互涓婃棤闇€鏀瑰姩銆?
+## 鐜瑕佹眰
 
-启动服务并保持运行：
+- Windows 10/11 x64
+- Node.js 24+
+- Apple 绉诲姩璁惧椹卞姩锛坕Tunes 鎴?Apple Devices锛汼ideloadly 鑷甫鐨?usbmuxd
+  涔熻兘琚?go-ios 浣跨敤锛?- [go-ios](https://github.com/danielpaulus/go-ios) 1.3.x锛坄ios.exe`锛?- [Sideloadly](https://sideloadly.io/) + 浠绘剰鍏嶈垂 Apple ID锛岀敤鏉ョ WebDriverAgent
+- iPhone 绯荤粺 iOS 17+锛屽凡寮€鍚紑鍙戣€呮ā寮忥紝USB 杩炴帴
 
-```sh
-git clone https://github.com/JosssphZhou/poki.git
-cd poki
-./bin/setup
-npm start
+## 蹇€熷紑濮?
+```powershell
+git clone https://github.com/wangweiwei8623-bit/poki-for-windows.git
+cd poki-for-windows
+npm ci
+
+# 1. 鐢?Sideloadly 绛惧悕骞跺畨瑁?WebDriverAgent锛堝彧闇€涓€娆★紝瑙?docs/install-windows.md锛?# 2. 寤虹珛寮€鍙戣€呴毀閬?.\goios\ios.exe tunnel start --userspace
+
+# 3. 鍚姩 WebDriverAgent锛堜繚鎸佺獥鍙ｄ笉鍏筹級
+.\goios\ios.exe runwda `
+  --bundleid=com.facebook.WebDriverAgentRunner.xctrunner.<TEAM_ID> `
+  --testrunnerbundleid=com.facebook.WebDriverAgentRunner.xctrunner.<TEAM_ID> `
+  --xctestconfig=WebDriverAgentRunner.xctest
+
+# 4. 鎶?WDA 鏆撮湶鍒版湰鏈?8100
+.\goios\ios.exe forward 8100 8100
+
+# 5. 鍚姩 MCP 鏈嶅姟
+$env:POKI_WDA_URL = 'http://127.0.0.1:8100'
+$env:POKI_MCP_STATE_DIR = "$env:USERPROFILE\Library\Application Support\PokiMCP"
+node src\daemon.mjs --port 47825
 ```
 
-需要 macOS 15 或更高版本、完整版 Xcode、Rust、Node.js 24+ 和 ffmpeg。`./bin/setup` 会检查缺失的依赖，首次构建需要几分钟。
-
-Poki 面向 macOS。Linux 用户详见社区移植版 [poki-for-linux](https://github.com/carrotciallo/poki-for-linux)（[#16](https://github.com/JosssphZhou/poki/issues/16)），它在本仓库之外维护。
-
-### macOS arm64 预编译安装包
-
-从版本发布页下载 `poki-v0.1.1-macos-arm64.tar.gz`，然后运行：
-
-```sh
-tar -xzf poki-v0.1.1-macos-arm64.tar.gz
-cd poki-v0.1.1
-npm ci --no-audit --no-fund
-npm start
+鏈嶅姟浼氭妸鍦板潃鍜?Bearer Token 鍐欏埌
+`%USERPROFILE%\Library\Application Support\PokiMCP\mcp.json`
+锛堝彲鐢?`POKI_MCP_STATE_DIR` 鏀硅矾寰勶級銆侻CP 瀹㈡埛绔洿鎺ヨ繛杩欎釜 URL锛?鎴栬€呯敤 stdio 妗ユ帴锛歚node src\stdio.mjs`銆?
+楠岃瘉锛?
+```powershell
+node bin/call.mjs list_devices
 ```
 
-安装包包含原生桥接和 idevice 工具，无需安装 Rust 或运行 `./bin/setup`。仍需 Apple Silicon Mac、完整版 Xcode、Node.js 24+、Python 3 和 ffmpeg。MCP 客户端注册和可选 Agent 安装按下文操作。
+浼氳繑鍥炲敮涓€涓€鍙拌澶?**`iPhone (WebDriverAgent)`**锛岃澶?id 鏄?`wda`銆?
+## WDA 鍚庣鏀寔鍝簺鎿嶄綔
 
-在同一目录下打开另一个终端，注册 MCP 服务：
-
-```sh
-claude mcp add --scope user poki-mcp -- node "$PWD/src/stdio.mjs"   # Claude Code
-codex mcp add poki-mcp -- node "$PWD/src/stdio.mjs"                 # Codex
-```
-
-**Poki Agent。** 如果要使用 Poki 独立终端智能体或消息渠道，保持 `npm start` 运行，在同一目录下打开另一个终端。安装智能体，将命令加入当前终端的路径，再登录模型账号：
-
-```sh
-npm ci --prefix agent
-export PATH="$PWD/bin:$PATH"
-poki login
-poki status
-```
-
-Poki Agent 默认使用 GPT-6.1 Terra（`gpt-6.1-terra`），推理强度为 low。建议保留这一配置，它是我们在手机任务中测试过的最快配置。可通过 `POKI_AGENT_MODEL` 更换模型，详见[运行 Poki Agent](agent/README.md)。
-
-如果连接 iPhone 真机，请先通过 USB 与 Mac 配对。详见[真机配置指南](docs/physical-iphone.md)。
-
-## 试跑一个任务
-
-Poki Agent 会自动选择唯一连接的 iPhone。连接多台设备时，加上 `--device '<device UUID>'` 指定设备。
-
-```sh
-node bin/call.mjs list_devices   # 查设备 UUID
-poki "Search esp32 in Chrome and summarize the top result"
-```
-
-> **注意：** Poki 操作的是真实手机，如果你让它发消息或付款，它会直接执行；屏幕内容也会发送给你配置的模型服务。
-
-越用越快：Poki Agent 会记住跑过的任务，再次执行同款任务时速度更快。
-
-**消息渠道：** 配置获授权的渠道后，运行 `poki imessage` 或 `poki telegram`。详见[运行 Poki Agent](agent/README.md)。
-
-**MCP 客户端：** Claude Code、Codex，以及任何支持 `mcpServers` JSON 配置的客户端。
-
-目前仅在中文界面的 iPhone 上验证过真机支持。真机仅支持竖屏，不支持 App 容器导出和直接打开设置子页面。详见[验证记录与已知限制](docs/verification.md)。
-
-## 文档
-
-| 主题 | 文档 |
+| 鎿嶄綔 | 鐘舵€?|
 | --- | --- |
-| 安装、其他 MCP 客户端与故障排查 | [安装指南](docs/install.md) |
-| Poki Agent、模型、iMessage 与 Telegram | [运行 Poki Agent](agent/README.md) |
-| MCP 工具说明 | [工具说明](docs/tools.md) |
-| 环境变量与会话管理 | [配置说明](docs/configuration.md) |
-| USB 配对、开发者模式与 Wi-Fi 连接 | [真机配置指南](docs/physical-iphone.md) |
-| 测试结果、已知限制与免责声明 | [验证与限制](docs/verification.md) |
-| 桥接层架构 | [原生桥接](native/NATIVE.md)与[模拟器适配](native/simulator.md) |
-| 路线图 | [poki.bot](https://poki.bot) |
+| `list_devices`銆乣get_device_info` | 鍙敤锛堝崟鍙拌櫄鎷熻澶?`wda`锛?|
+| `take_screenshot`銆佸睆骞曠缉鏀?| 鍙敤锛岀缉鏀剧敱 WDA 鎴浘灏哄鎺ㄧ畻 |
+| `list_elements`锛堟棤闅滅鏍戯級 | 鍙敤 |
+| `tap`銆乣double_tap`銆乣long_press`銆乣swipe`/`drag`銆乣pinch` | 宸插疄鐜?|
+| `type_text`銆乣press_key`锛圧eturn / Backspace锛?| 宸插疄鐜?|
+| `press_button`锛圚ome銆侀煶閲忛敭锛?| 宸插疄鐜?|
+| `launch_app`锛堟寜 bundle id锛?| 宸插疄鐜?|
+| `list_apps`銆乣configuration`銆佺粍鍚堥敭 | WDA 涓嶆彁渚?|
+| 妯℃嫙鍣ㄣ€佸綍灞忋€丱CR | 鏈Щ妞嶄笉鏀寔 |
 
-## 路线图
+## 鐪熸満楠岃瘉
 
-<p align="center">
-  <img src="docs/images/roadmap.zh-CN.png" width="860" alt="Poki 路线图。已发布：Poki MCP、Poki Agent、iMessage 与终端集成、自学习路线、远程连接。开发中：长连接性能优化、Telegram 集成、原生文本输入（不经剪贴板）、简化工具接口。计划中：Poki App，在 iPhone 本地运行，Mac 关机时可用。远期规划：iPhone Duo 支持、真机支持（无需安装 Xcode）、更多模型提供商。">
-</p>
+涓绘満锛歐indows 11 x64锛孨ode.js 24.22.1锛実o-ios 1.3.2銆?璁惧锛歩Phone 11 Pro锛宨OS 18.5锛學ebDriverAgent 16.15.2銆?
+| 妫€鏌ラ」 | 缁撴灉 |
+| --- | --- |
+| 寮€鍙戣€呴毀閬?+ `ios forward 8100` | 閫氳繃 |
+| `list_devices` 鈫?`iPhone (WebDriverAgent)` | 閫氳繃 |
+| `take_screenshot` | 閫氳繃锛?125脳2436 PNG锛?|
+| `list_elements` / WDA `source` | 閫氳繃 |
+| 鎷夎捣 Safari 骞舵墦寮€鎸囧畾 URL | 閫氳繃 |
+| `tap` / `type_text` | 宸插疄鐜帮紝灏氭湭鍦ㄨ褰曞湪妗堢殑杩愯涓獙璇?|
 
-## Star History
+## 宸茬煡闄愬埗
 
-<a href="https://www.star-history.com/?repos=JosssphZhou%2Fpoki&type=date&legend=top-left">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=JosssphZhou/poki&type=date&theme=dark&legend=top-left">
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=JosssphZhou/poki&type=date&legend=top-left">
-    <img alt="Star History chart" src="https://api.star-history.com/chart?repos=JosssphZhou/poki&type=date&legend=top-left">
-  </picture>
-</a>
+- **涓冨ぉ绛惧悕銆?* 鍏嶈垂 Apple ID 绛剧殑 WebDriverAgent 鍙湁 7 澶╂湁鏁堟湡锛岃繃鏈熻閲嶆柊
+  绛惧悕瀹夎銆?- **鎵嬫満蹇呴』瑙ｉ攣銆?* 閿佸睆鐘舵€佷笅鎷夎捣 App 鍜屽缓绔嬩細璇濋兘浼氬け璐ワ紱鏈Щ妞嶆棤娉曡В閿佽浜?  瀵嗙爜鐨勬墜鏈恒€?- **鍗曡澶囥€?* 涓€涓湇鍔″疄渚嬪彧鏆撮湶涓€鍙?WDA 璁惧銆?- **娌℃湁妯℃嫙鍣ㄥ拰 OCR銆?* 杩欎簺鏄?macOS 涓撴湁鑳藉姏锛屾澶勮烦杩囷紝瑙傚療渚濊禆鏃犻殰纰嶆爲鍜屾埅鍥俱€?- **鏈嶅姟鍙洃鍚湰鏈恒€?* 鏈Щ妞嶆妸涓婃父鐨?`POKI_BIND_HOST`/`POKI_HOST_ALLOW`
+  澶氬湴鍧€缁戝畾绠€鍖栨垚浜嗗崟涓€ `127.0.0.1`銆?
+## 鏂囨。
 
-## 核心贡献者
+| 涓婚 | 闃呰 |
+| --- | --- |
+| 绉绘璇存槑銆佷唬鐮佹敼鍔ㄣ€佷笌涓婃父宸紓 | [WINDOWS.md](WINDOWS.md) |
+| 瀹屾暣 Windows 瀹夎姝ラ | [docs/install-windows.md](docs/install-windows.md) |
+| 涓婃父鐨勬蹇典笌宸ュ叿鍙傝€?| [docs/tools.md](docs/tools.md)銆乕docs/physical-iphone.md](docs/physical-iphone.md) |
 
-<table>
-  <tbody>
-    <tr>
-      <td align="center" valign="top" width="50%"><a href="https://github.com/igc110"><img src="https://avatars.githubusercontent.com/u/241411380?v=4&size=240" width="120" height="120" alt="igc110"/><br /><sub><b>igc110</b></sub></a><br />在 <a href="https://github.com/JosssphZhou/poki/issues/10">#10</a> 中逐个阶段计时，查明真机每次点按约 7 秒的原因：每个请求都要读回屏幕，并新开一个 poki-native 进程。随后的修复让真机点按快了约三分之一。</td>
-      <td align="center" valign="top" width="50%"><a href="https://github.com/ZhehanZhang"><img src="https://avatars.githubusercontent.com/u/67270559?v=4&size=240" width="120" height="120" alt="ZhehanZhang"/><br /><sub><b>ZhehanZhang</b></sub></a><br />在 <a href="https://github.com/JosssphZhou/poki/issues/2">#2</a> 中提出通过 Tailscale 驱动 iPhone 真机，这是远程连接（<a href="https://github.com/JosssphZhou/poki/pull/8">#8</a>）的由来。</td>
-    </tr>
-  </tbody>
-</table>
+## 瀹夊叏
 
-## 感谢墙
+Poki 鎿嶄綔鐨勬槸鐪熸墜鏈猴細瀹冭兘鐐瑰嚮銆佽緭鍏ャ€佸彂娑堟伅銆佹墦寮€ App锛屽睆骞曞唴瀹逛細鍙戦€佺粰浣犻厤缃殑
+妯″瀷鏈嶅姟銆侻CP 绔偣鍙洃鍚?`127.0.0.1`锛屽苟瑕佹眰 `mcp.json` 閲岄偅涓?32 瀛楄妭 Bearer
+Token锛涜繖涓?Token 绛夊悓浜庡瘑鐮侊紝璇峰Ε鍠勪繚绠°€?
+## 璁稿彲璇佷笌鏉ユ簮
 
-感谢每一位提交过 Issue 或 Pull Request 的朋友，你们的反馈与修复让 Poki 变得更好。
+AGPL-3.0-only锛岀户鎵胯嚜涓婃父銆傝繖鏄慨鏀硅繃鐨勫垎鏀紝鏀瑰姩娓呭崟瑙?[NOTICE.md](NOTICE.md)锛岀涓夋柟渚濊禆瑙?[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)銆?
+涓婃父锛?https://github.com/JosssphZhou/poki> 路 <https://poki.bot>
 
-<!-- THANKS-WALL:START -->
-<table>
-  <tbody>
-    <tr>
-      <td align="center" valign="top" width="20%"><a href="https://github.com/ZhehanZhang"><img src="https://avatars.githubusercontent.com/u/67270559?v=4&size=160" width="80" height="80" alt="ZhehanZhang"/><br /><sub><b>ZhehanZhang</b></sub></a></td>
-      <td align="center" valign="top" width="20%"><a href="https://github.com/carrotciallo"><img src="https://avatars.githubusercontent.com/u/69567867?v=4&size=160" width="80" height="80" alt="carrotciallo"/><br /><sub><b>carrotciallo</b></sub></a></td>
-      <td align="center" valign="top" width="20%"><a href="https://github.com/edge369"><img src="https://avatars.githubusercontent.com/u/63720633?v=4&size=160" width="80" height="80" alt="edge369"/><br /><sub><b>edge369</b></sub></a></td>
-      <td align="center" valign="top" width="20%"><a href="https://github.com/guangtouge82"><img src="https://avatars.githubusercontent.com/u/269691899?v=4&size=160" width="80" height="80" alt="guangtouge82"/><br /><sub><b>guangtouge82</b></sub></a></td>
-      <td align="center" valign="top" width="20%"><a href="https://github.com/igc110"><img src="https://avatars.githubusercontent.com/u/241411380?v=4&size=160" width="80" height="80" alt="igc110"/><br /><sub><b>igc110</b></sub></a></td>
-    </tr>
-    <tr>
-      <td align="center" valign="top" width="20%"><a href="https://github.com/kilingzhang"><img src="https://avatars.githubusercontent.com/u/17439300?v=4&size=160" width="80" height="80" alt="kilingzhang"/><br /><sub><b>kilingzhang</b></sub></a></td>
-      <td align="center" valign="top" width="20%"><a href="https://github.com/makirqi-alt"><img src="https://avatars.githubusercontent.com/u/295395617?v=4&size=160" width="80" height="80" alt="makirqi-alt"/><br /><sub><b>makirqi-alt</b></sub></a></td>
-      <td align="center" valign="top" width="20%"><a href="https://github.com/mawenhao1028"><img src="https://avatars.githubusercontent.com/u/70818670?v=4&size=160" width="80" height="80" alt="mawenhao1028"/><br /><sub><b>mawenhao1028</b></sub></a></td>
-      <td align="center" valign="top" width="20%"><a href="https://github.com/zcyoung2000"><img src="https://avatars.githubusercontent.com/u/62181891?v=4&size=160" width="80" height="80" alt="zcyoung2000"/><br /><sub><b>zcyoung2000</b></sub></a></td>
-    </tr>
-  </tbody>
-</table>
-<!-- THANKS-WALL:END -->
-
-## 免责声明
-
-Poki 是独立的开源项目，与 Apple、OpenAI 以及它所操作的任何应用或网站的开发者均无关联，也未获得其认可。iPhone 是 Apple Inc. 的商标。
-
-自动操作第三方应用和网站可能违反其服务条款，请自行判断是否在相应服务上使用 Poki。Poki 在你的设备和账号上执行的操作由你负责，包括它发送的消息、作出的更改，以及由此导致的账号限制。
-
-Poki 按「原样」提供，不附带任何担保，具体以 AGPL-3.0 许可证为准。
-
-如有歧义，以英文版为准。
-
-## 开源许可
-
-Poki 基于 [AGPL-3.0-only 许可证](LICENSE)开源。
-
-Copyright (c) 2026 Joseph Zhou and contributors。开源依赖项保留各自的许可证，详见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。如需参与贡献，请阅读 [CONTRIBUTING.md](CONTRIBUTING.md)。
-
-## 致谢
-
-<p align="center">
-  <img src="docs/images/acknowledgments.png" width="860" alt="开源致谢：pi、idevice、idb、BlueBubbles、Hermes Agent、MCP SDK、sharp 与 FFmpeg"><br>
-  <sub>开源致谢：<a href="https://github.com/earendil-works/pi">pi</a> | <a href="https://github.com/jkcoxson/idevice">idevice</a> | <a href="https://github.com/facebook/idb">idb</a> | <a href="https://github.com/BlueBubblesApp/bluebubbles-server">BlueBubbles</a> | <a href="https://github.com/NousResearch/hermes-agent">Hermes Agent</a> | <a href="https://github.com/modelcontextprotocol/typescript-sdk">MCP SDK</a> | <a href="https://github.com/lovell/sharp">sharp</a> | <a href="https://github.com/FFmpeg/FFmpeg">FFmpeg</a></sub>
-</p>

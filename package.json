@@ -10,7 +10,8 @@
     "start": "node src/daemon.mjs",
     "mcp": "node src/stdio.mjs",
     "test": "node --test test/*.test.mjs",
-    "build:native": "./bin/build-native"
+    "build:native": "./bin/build-native",
+    "start:win": "node src/daemon.mjs --port 47825"
   },
   "dependencies": {
     "@modelcontextprotocol/client": "2.4.0",
@@ -20,7 +21,7 @@
     "zod": "^4.2.0"
   },
   "license": "AGPL-3.0-only",
-  "description": "Local MCP tools for iPhone and iOS Simulator automation on macOS.",
+  "description": "Local MCP tools for controlling a real iPhone over WebDriverAgent, on Windows.",
   "repository": {
     "type": "git",
     "url": "https://github.com/JosssphZhou/poki.git"

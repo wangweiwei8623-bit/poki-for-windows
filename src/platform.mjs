@@ -1,4 +1,4 @@
-import { nativeRequest } from './remote.mjs';
+import { remoteRequest } from './remote.mjs';
 import { spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { execute, pause, checkWork, signal, deadline, stopped, stoppingReason, phase } from './work.mjs';
@@ -29,7 +29,7 @@ const physical = async (id, args, expect) => {
   return result;
 };
 async function configuration(target, method, value) {
-  if (target.remote) return nativeRequest(target, { op: 'configuration', method, ...(value === undefined ? {} : { value }) });
+  if (target.remote) return remoteRequest(target, { op: 'configuration', method, ...(value === undefined ? {} : { value }) });
   const { stdout } = await platformRun(join(root, 'build/poki-native'), ['--udid', target.id], { input: JSON.stringify({ op: 'configuration', method, ...(value === undefined ? {} : { value }) }) });
   return JSON.parse(stdout);
 }
@@ -675,18 +675,6 @@ async function buildAndRun(ctx, target, args) {
   return { ...launched, app_path: appPath, build_log: buildLog, derived_data: derived };
 }
 
-function filesystemPath(value) {
-  return value.startsWith('file:') ? fileURLToPath(value) : value;
-}
-
-// devicectl reports each executable as a file URL. list_apps reports a filesystem path.
-export function terminateAppMatch(app, runningProcesses) {
-  const appPath = filesystemPath(app.path);
-  const processes = runningProcesses.filter(process => filesystemPath(process.executable).startsWith(appPath));
-  if (!processes.length) return { bundle_id: app.bundle_id, already_stopped: true };
-  return { processes };
-}
-
 export async function platformTool(ctx, name, args = {}) {
   if (name === 'start_simulator') return startSimulator(ctx, args);
   const target = await ctx.target();
@@ -725,9 +713,10 @@ export async function platformTool(ctx, name, args = {}) {
       if (target.kind === 'simulator') await simctl(['terminate', target.id, app.bundle_id]);
       else {
         const result = await devicectl(target.id, ['device', 'info', 'processes']);
-        const matched = terminateAppMatch(app, result.runningProcesses);
-        if (matched.already_stopped) return matched;
-        for (const process of matched.processes) await devicectl(target.id, ['device', 'process', 'terminate', '--pid', String(process.processIdentifier)]);
+        const appPath = app.path.startsWith('file:') ? fileURLToPath(app.path) : app.path;
+        const processes = result.runningProcesses.filter(process => process.executable.startsWith(appPath));
+        if (!processes.length) return { bundle_id: app.bundle_id, already_stopped: true };
+        for (const process of processes) await devicectl(target.id, ['device', 'process', 'terminate', '--pid', String(process.processIdentifier)]);
       }
       ctx.frame = undefined; ctx.elements = [];
       return { terminated: app.bundle_id };

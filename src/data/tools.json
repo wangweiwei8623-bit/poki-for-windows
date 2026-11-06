@@ -196,10 +196,6 @@
             "type": "number",
             "minimum": -1000000,
             "maximum": 1000000
-          },
-          "verify": {
-            "type": "boolean",
-            "description": "Set false to skip action verification. Returns verified:false. Text targeting and coordinate sizing still read current device data."
           }
         }
       }
@@ -215,10 +211,6 @@
           },
           "text": {
             "type": "string"
-          },
-          "verify": {
-            "type": "boolean",
-            "description": "Set false to skip action verification. Returns verified:false. Text targeting and coordinate sizing still read current device data."
           }
         },
         "required": [
@@ -316,10 +308,6 @@
             "type": "number",
             "minimum": 0,
             "maximum": 60000
-          },
-          "verify": {
-            "type": "boolean",
-            "description": "Set false to skip action verification. Returns verified:false. Text targeting and coordinate sizing still read current device data."
           }
         },
         "required": [
@@ -357,10 +345,6 @@
             "type": "number",
             "minimum": -1000000,
             "maximum": 1000000
-          },
-          "verify": {
-            "type": "boolean",
-            "description": "Set false to skip action verification. Returns verified:false. Text targeting and coordinate sizing still read current device data."
           }
         },
         "required": [
@@ -1252,10 +1236,6 @@
           },
           "stop_on_error": {
             "type": "boolean"
-          },
-          "verify": {
-            "type": "boolean",
-            "description": "Set false to skip verification on supported steps unless a step overrides it. Read the final screen once; its snapshot does not verify each action."
           }
         },
         "required": [
