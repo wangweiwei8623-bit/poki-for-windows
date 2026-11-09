@@ -2,8 +2,9 @@
   <img src="docs/images/poki-icon.png" width="72" height="72" alt="Poki icon">
 </p>
 
-<h1 align="center">Poki for Windows</h1>
+## Upstream status
 
+Documentation was reviewed against upstream `8b780c2` (2026-11-08). This fork's code base is `7ee03e3` (2026-11-07), so it is 102 upstream commits behind. Newer upstream features such as `run_code`, `look` / `do`, the OCR supplement and LAN RemotePairing are **not** part of this port yet. See [docs/upstream-sync.md](docs/upstream-sync.md) for the delta, and [WINDOWS.md](WINDOWS.md) for what the Windows backend supports.
 <p align="center">
   English | <a href="README.zh-CN.md">简体中文</a>
 </p>
