@@ -1,6 +1,8 @@
 <p align="center">
   <img src="docs/images/poki-icon.png" width="72" height="72" alt="Poki icon">
 </p>
+<h1 align="center">Poki for Windows</h1>h1>
+
 
 ## Upstream status
 
